@@ -118,3 +118,6 @@ def run() -> None:
 
         if elapsed < REQUEST_INTERVAL:
             time.sleep(REQUEST_INTERVAL - elapsed)
+            
+if __name__ == "__main__":
+    run()
