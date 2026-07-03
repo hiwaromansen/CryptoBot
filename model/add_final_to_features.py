@@ -54,4 +54,46 @@ def compute_final_label(df: pd.DataFrame) -> pd.Series:
 
     return pd.Series(labels, index=df.index, name="final")
     
- 
+ def process(df: pd.DataFrame) -> pd.DataFrame:
+
+    df = df.copy()
+
+    df["final"] = compute_final_label(df)
+
+    return df
+
+def main():
+
+    parser = argparse.ArgumentParser(
+        description="Generate ML target labels."
+    )
+
+    parser.add_argument(
+        "input_file",
+        type=Path,
+    )
+
+    args = parser.parse_args()
+
+    logger.info("Reading %s", args.input_file)
+
+    data = pd.read_csv(
+        args.input_file,
+        sep="\t",
+        index_col=0,
+    )
+
+    logger.info("Loaded %,d rows", len(data))
+
+    result = process(data)
+
+    output = args.input_file.with_suffix(".with_final.tsv")
+
+    logger.info("Writing %s", output)
+
+    result.to_csv(
+        output,
+        sep="\t",
+    )
+
+    logger.info("Done.")
