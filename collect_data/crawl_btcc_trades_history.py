@@ -54,3 +54,11 @@ def fetch_trades(timestamp: float) -> list[dict[str, Any]]:
     response.raise_for_status()
 
     return [format_trade(t) for t in response.json()]
+    
+def latest_timestamp(default: float) -> float:
+    latest = collection.find_one(sort=[("timestamp", -1)])
+
+    if latest:
+        return latest["timestamp"]
+
+    return default
