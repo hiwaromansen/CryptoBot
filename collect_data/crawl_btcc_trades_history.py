@@ -62,3 +62,19 @@ def latest_timestamp(default: float) -> float:
         return latest["timestamp"]
 
     return default
+    
+def save_trades(trades: list[dict[str, Any]]) -> None:
+
+    if not trades:
+        return
+
+    operations = [
+        UpdateOne(
+            {"_id": trade["_id"]},
+            {"$setOnInsert": trade},
+            upsert=True,
+        )
+        for trade in trades
+    ]
+
+    collection.bulk_write(operations, ordered=False)
