@@ -26,3 +26,31 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+def compute_final_label(df: pd.DataFrame) -> pd.Series:
+    """
+    Compute target label.
+
+        1  -> Bullish
+        0  -> Neutral
+       -1  -> Bearish
+    """
+
+    columns = [f"mid{mid}" for mid in MIDS]
+
+    average = df[columns].mean(axis=1)
+
+    labels = np.select(
+        [
+            average > THRESHOLD,
+            average < -THRESHOLD,
+        ],
+        [
+            1,
+            -1,
+        ],
+        default=0,
+    )
+
+    return pd.Series(labels, index=df.index, name="final")
+    
