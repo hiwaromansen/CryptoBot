@@ -1,55 +1,36 @@
-#python collect_btcc_ticks.py
-from urllib2 import urlopen
+"""
+Collect BTCC ticker data and store it in MongoDB.
+
+Usage:
+    python collect_btcc_ticks.py
+"""
+
+from __future__ import annotations
+
+import logging
 import time
-import json
+from typing import Any
+
+import requests
 from pymongo import MongoClient
-import sys
-import datetime
+from pymongo.errors import PyMongoError
 
-api = 'http://data.btcchina.com'
-tick_url = '{0}/data/ticker?market=btccny'.format(api)
+API_URL = "http://data.btcchina.com"
+TICKER_URL = f"{API_URL}/data/ticker?market=btccny"
+
+DATABASE = "cryptobot"
+COLLECTION = "btcc_btccny_ticks"
+
+REQUEST_TIMEOUT = 5
+REQUEST_INTERVAL = 1.0
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+)
+
+logger = logging.getLogger(__name__)
+
 client = MongoClient()
-db = client['cryptobot']
-ticks_collection = db['btcc_btccny_ticks']
-sleep_between_requests_secs = 1.0
-timestamp_format = "%Y-%m-%d %H:%M:%S.%f"
+collection = client[DATABASE][COLLECTION]
 
-def get_formatted_time_string(this_time):
-    return datetime.datetime.utcfromtimestamp(this_time).strftime(timestamp_format)
-
-def get_json(url):
-    '''
-    Gets json from the API
-    '''
-    resp = urlopen(url,timeout=5)
-    entry = json.load(resp)['ticker']
-    entry['_id'] = entry.pop('date')
-    for key in entry:
-        entry[key] = float(entry[key])
-    # tick = {}
-    # tick['_id'] = float(entry['date'])
-    # tick['high'] = float(entry['high'])
-    # tick['low'] = float(entry['low'])
-    # tick['buy'] = float(entry['buy'])
-    # tick['sell'] = float(entry['sell'])
-    return entry, resp.getcode()
-
-print 'Running...'
-while True:
-    start = time.time()
-    print '*** Getting tick at',get_formatted_time_string(start),start,'.',
-    try:
-        tick, code = get_json(tick_url)
-    except Exception as e:
-        print e
-        sys.exc_clear()
-    else:
-        if code != 200:
-            print code
-        else:
-            print 'Gotten it for',get_formatted_time_string(tick['_id']),tick['_id']
-            ticks_collection.update_one({'_id': tick['_id']},
-                                         {'$setOnInsert': tick}, upsert=True)
-            time_delta = time.time()-start
-            if time_delta < sleep_between_requests_secs:
-                time.sleep(sleep_between_requests_secs-time_delta)
