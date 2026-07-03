@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="images/bot.png" width="180"/>
+<img src="images/Enhanced_Bot.png" width="180"/>
 
 # CryptoBot
 
