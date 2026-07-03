@@ -61,3 +61,36 @@ def save_ticker(ticker: dict[str, Any]) -> None:
         {"$setOnInsert": ticker},
         upsert=True,
     )
+def run() -> None:
+
+    logger.info("BTCC ticker collector started.")
+
+    while True:
+
+        started = time.time()
+
+        try:
+
+            ticker = fetch_ticker()
+
+            save_ticker(ticker)
+
+            logger.info(
+                "Ticker stored | timestamp=%s price=%s",
+                ticker["_id"],
+                ticker.get("last", "-"),
+            )
+
+        except requests.RequestException as exc:
+            logger.error("HTTP Error: %s", exc)
+
+        except PyMongoError as exc:
+            logger.error("MongoDB Error: %s", exc)
+
+        except Exception:
+            logger.exception("Unexpected error")
+
+        elapsed = time.time() - started
+
+        if elapsed < REQUEST_INTERVAL:
+            time.sleep(REQUEST_INTERVAL - elapsed)
