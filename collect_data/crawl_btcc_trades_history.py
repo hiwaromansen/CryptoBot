@@ -111,3 +111,21 @@ def crawl(continuous: bool):
 
         if elapsed < REQUEST_DELAY:
             time.sleep(REQUEST_DELAY - elapsed)
+            
+def main():
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--continuous",
+        action="store_true",
+        help="Keep polling forever.",
+    )
+
+    args = parser.parse_args()
+
+    crawl(args.continuous)
+
+
+if __name__ == "__main__":
+    main()
