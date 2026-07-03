@@ -84,3 +84,37 @@ def save_book(book: dict[str, Any]) -> None:
         book,
         upsert=True,
     )
+
+def run() -> None:
+
+    logger.info("BTCC order book collector started.")
+
+    while True:
+
+        started = time.time()
+
+        try:
+
+            book = fetch_order_book()
+
+            save_book(book)
+
+            logger.info(
+                "Stored snapshot | bids=%d asks=%d",
+                len(book["bids"]),
+                len(book["asks"]),
+            )
+
+        except requests.RequestException as exc:
+            logger.error("HTTP Error: %s", exc)
+
+        except PyMongoError as exc:
+            logger.error("MongoDB Error: %s", exc)
+
+        except Exception:
+            logger.exception("Unexpected error")
+
+        elapsed = time.time() - started
+
+        if elapsed < REQUEST_INTERVAL:
+            time.sleep(REQUEST_INTERVAL - elapsed)
