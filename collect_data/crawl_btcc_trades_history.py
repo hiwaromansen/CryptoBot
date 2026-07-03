@@ -44,3 +44,13 @@ def format_trade(trade: dict[str, Any]) -> dict[str, Any]:
         "price": float(trade["price"]),
         "timestamp": float(trade["date"]),
     }
+    
+def fetch_trades(timestamp: float) -> list[dict[str, Any]]:
+    response = requests.get(
+        TRADES_URL.format(since=int(timestamp)),
+        timeout=REQUEST_TIMEOUT,
+    )
+
+    response.raise_for_status()
+
+    return [format_trade(t) for t in response.json()]
