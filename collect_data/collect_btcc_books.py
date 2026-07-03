@@ -74,3 +74,13 @@ def fetch_order_book() -> dict[str, Any]:
         "asks": normalize_orders(book["asks"], timestamp),
     }
 
+def save_book(book: dict[str, Any]) -> None:
+    """
+    Store one order book snapshot.
+    """
+
+    collection.replace_one(
+        {"_id": book["_id"]},
+        book,
+        upsert=True,
+    )
