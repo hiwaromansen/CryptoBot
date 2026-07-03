@@ -34,3 +34,19 @@ logger = logging.getLogger(__name__)
 client = MongoClient()
 collection = client[DATABASE][COLLECTION]
 
+def normalize_orders(
+    orders: list[list[str]],
+    timestamp: float,
+) -> list[dict[str, float]]:
+    """
+    Convert raw order book rows into dictionaries.
+    """
+
+    return [
+        {
+            "price": float(price),
+            "amount": float(amount),
+            "timestamp": timestamp,
+        }
+        for price, amount in orders
+    ]
