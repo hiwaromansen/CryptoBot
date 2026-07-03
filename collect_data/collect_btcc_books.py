@@ -50,3 +50,27 @@ def normalize_orders(
         }
         for price, amount in orders
     ]
+
+def fetch_order_book() -> dict[str, Any]:
+    """
+    Download current BTCC order book.
+    """
+
+    response = requests.get(
+        ORDERBOOK_URL,
+        timeout=REQUEST_TIMEOUT,
+    )
+
+    response.raise_for_status()
+
+    book = response.json()
+
+    timestamp = float(book.pop("date"))
+
+    return {
+        "_id": int(timestamp * 1000),
+        "timestamp": timestamp,
+        "bids": normalize_orders(book["bids"], timestamp),
+        "asks": normalize_orders(book["asks"], timestamp),
+    }
+
