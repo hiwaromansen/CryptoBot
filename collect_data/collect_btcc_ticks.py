@@ -51,3 +51,13 @@ def fetch_ticker() -> dict[str, Any]:
 
     return ticker
 
+def save_ticker(ticker: dict[str, Any]) -> None:
+    """
+    Insert ticker if it doesn't already exist.
+    """
+
+    collection.update_one(
+        {"_id": ticker["_id"]},
+        {"$setOnInsert": ticker},
+        upsert=True,
+    )
