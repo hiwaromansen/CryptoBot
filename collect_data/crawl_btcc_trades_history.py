@@ -36,3 +36,11 @@ logger = logging.getLogger(__name__)
 
 client = MongoClient()
 collection = client[DATABASE][COLLECTION]
+
+def format_trade(trade: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "_id": int(trade["tid"]),
+        "amount": float(trade["amount"]),
+        "price": float(trade["price"]),
+        "timestamp": float(trade["date"]),
+    }
